@@ -160,8 +160,7 @@ class FooterSection extends StatelessWidget {
           onTap: () => launchUrl(Uri.parse(_tiktokUrl)),
         ),
         const SizedBox(width: 6),
-        _SocialCircle(
-          icon: Icons.camera_alt_outlined,
+        _InstagramIcon(
           color: primary,
           onTap: () => launchUrl(Uri.parse(_instagramUrl)),
         ),
@@ -193,6 +192,48 @@ class _SocialCircle extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: 16),
+      ),
+    );
+  }
+}
+
+class _InstagramIcon extends StatelessWidget {
+  final Color color;
+  final VoidCallback onTap;
+
+  const _InstagramIcon({required this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Container(
+            width: 16,
+            height: 16,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+            child: Center(
+              child: Container(
+                width: 4,
+                height: 4,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
