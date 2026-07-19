@@ -161,7 +161,6 @@ class FooterSection extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         _InstagramIcon(
-          color: primary,
           onTap: () => launchUrl(Uri.parse(_instagramUrl)),
         ),
       ],
@@ -198,10 +197,9 @@ class _SocialCircle extends StatelessWidget {
 }
 
 class _InstagramIcon extends StatelessWidget {
-  final Color color;
   final VoidCallback onTap;
 
-  const _InstagramIcon({required this.color, required this.onTap});
+  const _InstagramIcon({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +209,16 @@ class _InstagramIcon extends StatelessWidget {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: color,
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFFF58529),
+              Color(0xFFDD2A7B),
+              Color(0xFF8134AF),
+              Color(0xFF515BD4),
+            ],
+            begin: Alignment.bottomRight,
+            end: Alignment.topLeft,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(
