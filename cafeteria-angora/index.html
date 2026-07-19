@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cafeteria Angora — Menu Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --navy: #0a0e27;
+      --navy-light: #111638;
+      --gold: #d4a853;
+      --gold-light: #f0cf7a;
+      --gold-glow: rgba(212, 168, 83, 0.3);
+      --blue-neon: #00d4ff;
+      --blue-glow: rgba(0, 212, 255, 0.25);
+      --card-bg: rgba(17, 22, 56, 0.75);
+      --text-white: #f0f0f0;
+      --text-muted: #8892b0;
+      --radius: 20px;
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--text-white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── BG AMBIENT GLOW ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(0, 212, 255, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(212, 168, 83, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(10, 14, 39, 1) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── ANIMATED BG PARTICLES ─── */
+    .bg-particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: 0;
+      animation: floatParticle linear infinite;
+    }
+    @keyframes floatParticle {
+      0% { opacity: 0; transform: translateY(100vh) scale(0); }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { opacity: 0; transform: translateY(-10vh) scale(1); }
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--navy);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--gold);
+      border-radius: 3px;
+    }
+
+    /* ─── CONTAINER ─── */
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+      min-height: 100vh;
+    }
+
+    /* ─── TABLET FRAME ─── */
+    .tablet-frame {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 520px;
+      height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+        var(--navy);
+      border-left: 1px solid rgba(212, 168, 83, 0.15);
+      border-right: 1px solid rgba(212, 168, 83, 0.15);
+      box-shadow: 0 0 80px rgba(0, 212, 255, 0.05);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .tablet-frame::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 6px;
+      background: rgba(212, 168, 83, 0.2);
+      border-radius: 3px;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      position: relative;
+      z-index: 2;
+      padding: 40px 0 20px;
+      text-align: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .brand h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      font-style: italic;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .brand-icon {
+      font-size: 30px;
+    }
+    .subtitle {
+      font-size: 12px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 300;
+    }
+    .header-line {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 12px auto 0;
+    }
+
+    /* ─── HERO / CAT SECTION ─── */
+    .hero-section {
+      position: relative;
+      height: 200px;
+      margin: 10px 0 30px;
+      overflow: visible;
+    }
+
+    /* ─── CAT CONTAINER ─── */
+    .cat-scene {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    .cat-wrapper {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      top: 30px;
+      animation: catJump 6s ease-in-out infinite;
+    }
+    @keyframes catJump {
+      0%   { left: -10%; top: 60px; transform: scaleX(1) rotate(-5deg); }
+      15%  { left: 15%;  top: 0px;  transform: scaleX(1) rotate(8deg); }
+      30%  { left: 35%;  top: 40px; transform: scaleX(1) rotate(-3deg); }
+      45%  { left: 55%;  top: 5px;  transform: scaleX(1) rotate(10deg); }
+      60%  { left: 72%;  top: 35px; transform: scaleX(1) rotate(-2deg); }
+      75%  { left: 90%;  top: 10px; transform: scaleX(1) rotate(6deg); }
+      85%  { left: 70%;  top: 50px; transform: scaleX(-1) rotate(-5deg); }
+      100% { left: -10%; top: 60px; transform: scaleX(1) rotate(-5deg); }
+    }
+
+    /* ─── CAT SVG ─── */
+    .cat-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 20px rgba(212, 168, 83, 0.3));
+      animation: catFloat 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes catFloat {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(-8px); }
+    }
+
+    /* ─── SPARKLE TRAIL ─── */
+    .sparkle-trail {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .sparkle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: var(--gold-light);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--gold-glow), 0 0 20px var(--gold-glow);
+      opacity: 0;
+      animation: sparkleAnim 2s ease-in-out infinite;
+    }
+    @keyframes sparkleAnim {
+      0%   { opacity: 0; transform: scale(0); }
+      50%  { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0); }
+    }
+
+    /* ─── NAV DOTS ─── */
+    .nav-categories {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .nav-dot {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(212, 168, 83, 0.06);
+      border: 1px solid rgba(212, 168, 83, 0.12);
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.4s ease;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .nav-dot:hover,
+    .nav-dot.active {
+      background: rgba(212, 168, 83, 0.15);
+      border-color: var(--gold);
+      color: var(--gold-light);
+      box-shadow: 0 0 20px var(--gold-glow);
+    }
+    .nav-dot .dot-icon {
+      font-size: 14px;
+    }
+
+    /* ─── CATEGORY SECTION ─── */
+    .category {
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s ease;
+    }
+    .category.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(212, 168, 83, 0.1);
+    }
+    .category-icon {
+      font-size: 24px;
+    }
+    .category-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .category-count {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+    .category-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 300;
+      letter-spacing: 2px;
+    }
+
+    /* ─── MENU GRID ─── */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    /* ─── MENU ITEM CARD ─── */
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(212, 168, 83, 0.08);
+      border-radius: var(--radius);
+      transition: all 0.4s ease;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+    .menu-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.03), transparent);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .menu-item:hover {
+      border-color: rgba(212, 168, 83, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), 0 0 30px var(--gold-glow);
+    }
+    .menu-item:hover::before {
+      opacity: 1;
+    }
+
+    .item-img {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid rgba(212, 168, 83, 0.1);
+      background: var(--navy-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    .item-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .item-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-white);
+      margin-bottom: 3px;
+      letter-spacing: 0.3px;
+    }
+    .item-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 300;
+      line-height: 1.4;
+    }
+    .item-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .item-price {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 0.5px;
+    }
+    .item-badge {
+      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--blue-neon);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .item-corner {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .item-corner .item-price {
+      font-size: 15px;
+    }
+
+    /* ─── NEON GLOW LINE ─── */
+    .glow-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--blue-neon), transparent);
+      margin: 10px 0 8px;
+      opacity: 0.3;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      padding: 30px 0 20px;
+      border-top: 1px solid rgba(212, 168, 83, 0.06);
+    }
+    footer p {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      font-weight: 300;
+    }
+    footer .gold-text {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (min-width: 600px) {
+      .menu-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .menu-item {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+      }
+      .item-img {
+        width: 100%;
+        height: 120px;
+        border-radius: 12px;
+        font-size: 36px;
+      }
+      .app {
+        max-width: 720px;
+        padding: 0 30px 40px;
+      }
+      .tablet-frame {
+        max-width: 780px;
+      }
+      .brand h1 {
+        font-size: 34px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .brand h1 {
+        font-size: 22px;
+      }
+      .menu-item {
+        padding: 12px 14px;
+      }
+      .item-img {
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="tablet-frame"></div>
+
+  <!-- BG PARTICLES -->
+  <div class="bg-particles" id="particles"></div>
+
+  <!-- SPARKLE TRAIL (follows cat) -->
+  <div class="sparkle-trail" id="sparkleTrail"></div>
+
+  <div class="app">
+
+    <!-- HEADER -->
+    <header>
+      <div class="brand">
+        <span class="brand-icon">🐱</span>
+        <h1>Cafeteria Angora</h1>
+      </div>
+      <p class="subtitle">Menu Digital &bull; Premium</p>
+      <div class="header-line"></div>
+    </header>
+
+    <!-- HERO / CAT -->
+    <section class="hero-section">
+      <div class="cat-scene">
+        <div class="cat-wrapper" id="catWrapper">
+          <svg class="cat-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="bodyFur" cx="50%" cy="40%" r="60%">
+                <stop offset="0%" stop-color="#fff8f0"/>
+                <stop offset="60%" stop-color="#ffffff"/>
+                <stop offset="100%" stop-color="#f0e6d6"/>
+              </radialGradient>
+              <radialGradient id="eyeBlue" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#a8e6ff"/>
+                <stop offset="50%" stop-color="#00b4ff"/>
+                <stop offset="100%" stop-color="#0055aa"/>
+              </radialGradient>
+              <radialGradient id="eyeGold" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ffe8a0"/>
+                <stop offset="50%" stop-color="#d4a853"/>
+                <stop offset="100%" stop-color="#b8860b"/>
+              </radialGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <!-- Brioche texture pattern -->
+              <pattern id="brioche" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+                <rect width="12" height="12" fill="#c4953a"/>
+                <circle cx="3" cy="3" r="1.5" fill="#d4a853" opacity="0.6"/>
+                <circle cx="9" cy="9" r="1.5" fill="#b8860b" opacity="0.4"/>
+                <circle cx="6" cy="0" r="1" fill="#e8c06a" opacity="0.3"/>
+                <circle cx="0" cy="6" r="1" fill="#e8c06a" opacity="0.3"/>
+              </pattern>
+            </defs>
+
+            <!-- Body -->
+            <ellipse cx="100" cy="115" rx="55" ry="40" fill="url(#bodyFur)"/>
+            <!-- Brioche stripe on back -->
+            <path d="M60 90 Q100 65 140 90 Q140 110 100 125 Q60 110 60 90Z" fill="url(#brioche)" opacity="0.7"/>
+            <path d="M65 92 Q100 70 135 92" stroke="#a07020" stroke-width="0.8" fill="none" opacity="0.3"/>
+
+            <!-- Tail (fluffy) -->
+            <path d="M150 120 Q175 100 180 80 Q185 60 175 50 Q170 48 168 55 Q175 65 172 80 Q168 95 150 115"
+                  fill="url(#bodyFur)" stroke="#f0e6d6" stroke-width="0.5"/>
+            <path d="M178 52 Q182 45 178 40 Q175 38 173 44" fill="url(#bodyFur)"/>
+
+            <!-- Head -->
+            <ellipse cx="100" cy="65" rx="38" ry="35" fill="url(#bodyFur)"/>
+            <!-- Cheek fluff -->
+            <ellipse cx="68" cy="72" rx="16" ry="12" fill="url(#bodyFur)" opacity="0.6"/>
+            <ellipse cx="132" cy="72" rx="16" ry="12" fill="url(#bodyFur)" opacity="0.6"/>
+
+            <!-- Ears -->
+            <path d="M70 45 L58 18 L82 38Z" fill="url(#bodyFur)" stroke="#f0e6d6" stroke-width="0.5"/>
+            <path d="M130 45 L142 18 L118 38Z" fill="url(#bodyFur)" stroke="#f0e6d6" stroke-width="0.5"/>
+            <!-- Inner ears -->
+            <path d="M69 42 L61 24 L79 38Z" fill="#f5d0d0" opacity="0.5"/>
+            <path d="M131 42 L139 24 L121 38Z" fill="#f5d0d0" opacity="0.5"/>
+
+            <!-- Eyes (Heterochromia) -->
+            <!-- Blue eye (right/front) -->
+            <ellipse cx="84" cy="62" rx="9" ry="10" fill="url(#eyeBlue)" filter="url(#glow)"/>
+            <ellipse cx="84" cy="62" rx="9" ry="10" fill="none" stroke="#a8e6ff" stroke-width="0.5" opacity="0.5"/>
+            <ellipse cx="84" cy="60" rx="3" ry="4" fill="white" opacity="0.7"/>
+            <ellipse cx="86" cy="58" rx="1.5" ry="1.5" fill="white" opacity="0.9"/>
+
+            <!-- Gold eye (left/front) -->
+            <ellipse cx="116" cy="62" rx="9" ry="10" fill="url(#eyeGold)" filter="url(#glow)"/>
+            <ellipse cx="116" cy="62" rx="9" ry="10" fill="none" stroke="#ffe8a0" stroke-width="0.5" opacity="0.5"/>
+            <ellipse cx="116" cy="60" rx="3" ry="4" fill="white" opacity="0.7"/>
+            <ellipse cx="118" cy="58" rx="1.5" ry="1.5" fill="white" opacity="0.9"/>
+
+            <!-- Nose -->
+            <path d="M99 72 L97 76 L103 76Z" fill="#f5a0a0"/>
+            <!-- Mouth -->
+            <path d="M100 76 Q93 82 90 80" stroke="#d4a853" stroke-width="0.8" fill="none" opacity="0.4"/>
+            <path d="M100 76 Q107 82 110 80" stroke="#d4a853" stroke-width="0.8" fill="none" opacity="0.4"/>
+
+            <!-- Whiskers -->
+            <g stroke="#e8dcc8" stroke-width="0.6" opacity="0.5">
+              <line x1="68" y1="68" x2="40" y2="62"/>
+              <line x1="68" y1="72" x2="38" y2="72"/>
+              <line x1="68" y1="76" x2="40" y2="82"/>
+              <line x1="132" y1="68" x2="160" y2="62"/>
+              <line x1="132" y1="72" x2="162" y2="72"/>
+              <line x1="132" y1="76" x2="160" y2="82"/>
+            </g>
+
+            <!-- Front paws -->
+            <ellipse cx="75" cy="148" rx="10" ry="7" fill="url(#bodyFur)"/>
+            <ellipse cx="125" cy="148" rx="10" ry="7" fill="url(#bodyFur)"/>
+            <!-- Paw pads -->
+            <circle cx="75" cy="148" r="2.5" fill="#f5d0d0" opacity="0.4"/>
+            <circle cx="125" cy="148" r="2.5" fill="#f5d0d0" opacity="0.4"/>
+
+            <!-- Body fur texture lines -->
+            <g stroke="#f0e6d6" stroke-width="0.4" opacity="0.3">
+              <path d="M70 105 Q90 95 110 105" fill="none"/>
+              <path d="M65 115 Q90 105 115 115" fill="none"/>
+              <path d="M75 125 Q95 115 120 125" fill="none"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- NAV DOTS -->
+    <nav class="nav-categories" id="navCategories">
+      <button class="nav-dot active" data-cat="gourmandises">
+        <span class="dot-icon">🥞</span> Gourmandises
+      </button>
+      <button class="nav-dot" data-cat="chaudes">
+        <span class="dot-icon">☕</span> Chaudes
+      </button>
+      <button class="nav-dot" data-cat="froides">
+        <span class="dot-icon">🥤</span> Froides
+      </button>
+      <button class="nav-dot" data-cat="pizzas">
+        <span class="dot-icon">🍕</span> Pizzas &amp; Tacos
+      </button>
+    </nav>
+
+    <!-- ─── CATEGORY: GOURMANDISES ─── -->
+    <section class="category visible" id="cat-gourmandises">
+      <div class="category-header">
+        <span class="category-icon">🥞</span>
+        <div>
+          <h2 class="category-title">Gourmandises</h2>
+          <p class="category-subtitle">Douceurs &amp; Délices</p>
+        </div>
+        <span class="category-count">06</span>
+      </div>
+      <div class="menu-grid">
+        <div class="menu-item">
+          <div class="item-img">🥞</div>
+          <div class="item-info">
+            <div class="item-name">Crêpes Angora</div>
+            <div class="item-desc">Pâte légère à la vanille, miel &amp; amandes effilées</div>
+            <div class="item-footer">
+              <span class="item-price">600 DA</span>
+              <span class="item-badge">Signature</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🧇</div>
+          <div class="item-info">
+            <div class="item-name">Gaufres Royales</div>
+            <div class="item-desc">Gaufres dorées, chantilly &amp; coulis de fruits rouges</div>
+            <div class="item-footer">
+              <span class="item-price">550 DA</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🥞</div>
+          <div class="item-info">
+            <div class="item-name">Pancakes Nuage</div>
+            <div class="item-desc">Empilement fluffy, sirop érable &amp; beurre fondant</div>
+            <div class="item-footer">
+              <span class="item-price">650 DA</span>
+              <span class="item-badge">Best-seller</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🍫</div>
+          <div class="item-info">
+            <div class="item-name">Crêpes Choco-Angora</div>
+            <div class="item-desc">Pâte au cacao, Nutella &amp; éclats de noisettes caramélisées</div>
+            <div class="item-footer">
+              <span class="item-price">700 DA</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🍩</div>
+          <div class="item-info">
+            <div class="item-name">Waffle Bricohe</div>
+            <div class="item-desc">Gaufre briochée à la fleur d'oranger, glaçage miel</div>
+            <div class="item-footer">
+              <span class="item-price">580 DA</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🍨</div>
+          <div class="item-info">
+            <div class="item-name">Coupe Angora</div>
+            <div class="item-desc">Glace vanille, crème chantilly, caramel beurre salé &amp; gaufrette</div>
+            <div class="item-footer">
+              <span class="item-price">750 DA</span>
+              <span class="item-badge">Premium</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CATEGORY: BOISSONS CHAUDES ─── -->
+    <section class="category" id="cat-chaudes">
+      <div class="category-header">
+        <span class="category-icon">☕</span>
+        <div>
+          <h2 class="category-title">Boissons Chaudes</h2>
+          <p class="category-subtitle">Espresso &amp; Traditions</p>
+        </div>
+        <span class="category-count">05</span>
+      </div>
+      <div class="menu-grid">
+        <div class="menu-item">
+          <div class="item-img">☕</div>
+          <div class="item-info">
+            <div class="item-name">Espresso Angora</div>
+            <div class="item-desc">Corsé &amp; crémeux, arômes de cacao et noisette</div>
+            <div class="item-footer">
+              <span class="item-price">350 DA</span>
+              <span class="item-badge">Signature</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">☕</div>
+          <div class="item-info">
+            <div class="item-name">Cappuccino Royal</div>
+            <div class="item-desc">Mousse de lait onctueuse, saupoudré de cacao amer</div>
+            <div class="item-footer">
+              <span class="item-price">450 DA</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🫖</div>
+          <div class="item-info">
+            <div class="item-name">Thé à la Menthe</div>
+            <div class="item-desc">Thé vert, menthe fraîche &amp; sucre — tradition orientale</div>
+            <div class="item-footer">
+              <span class="item-price">300 DA</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🍵</div>
+          <div class="item-info">
+            <div class="item-name">Chocolat Viennois</div>
+            <div class="item-desc">Chocolat chaud épais, chantilly &amp; copeaux de chocolat noir</div>
+            <div class="item-footer">
+              <span class="item-price">500 DA</span>
+              <span class="item-badge">Best-seller</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🫖</div>
+          <div class="item-info">
+            <div class="item-name">Thé Impérial</div>
+            <div class="item-desc">Thé noir aux épices, orange &amp; bâton de cannelle</div>
+            <div class="item-footer">
+              <span class="item-price">380 DA</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CATEGORY: BOISSONS FROIDES ─── -->
+    <section class="category" id="cat-froides">
+      <div class="category-header">
+        <span class="category-icon">🥤</span>
+        <div>
+          <h2 class="category-title">Boissons Froides</h2>
+          <p class="category-subtitle">Fraîcheur &amp; Créations</p>
+        </div>
+        <span class="category-count">06</span>
+      </div>
+      <div class="menu-grid">
+        <div class="menu-item">
+          <div class="item-img">🥤</div>
+          <div class="item-info">
+            <div class="item-name">Bleu Mojito</div>
+            <div class="item-desc">Mojito bleu lumineux, menthe fraîche, citron vert &amp; eau gazeuse</div>
+            <div class="item-footer">
+              <span class="item-price">500 DA</span>
+              <span class="item-badge">Signature</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🥤</div>
+          <div class="item-info">
+            <div class="item-name">Milkshake Pistache</div>
+            <div class="item-desc">Purée de pistache, lait entier, crème &amp; éclats de pistache</div>
+            <div class="item-footer">
+              <span class="item-price">650 DA</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🥤</div>
+          <div class="item-info">
+            <div class="item-name">Milkshake Nutella</div>
+            <div class="item-desc">Nutella onctueux, lait frappé &amp; chantilly noisette</div>
+            <div class="item-footer">
+              <span class="item-price">650 DA</span>
+              <span class="item-badge">Best-seller</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🍊</div>
+          <div class="item-info">
+            <div class="item-name">Jus d'Orange Pressé</div>
+            <div class="item-desc">Orange fraîchement pressée, pulpe &amp; glace</div>
+            <div class="item-footer">
+              <span class="item-price">350 DA</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🥤</div>
+          <div class="item-info">
+            <div class="item-name">Limonade Menthe-Citron</div>
+            <div class="item-desc">Citron pressé, menthe fraîche, eau pétillante &amp; sirop maison</div>
+            <div class="item-footer">
+              <span class="item-price">400 DA</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🧋</div>
+          <div class="item-info">
+            <div class="item-name">Iced Latte Caramel</div>
+            <div class="item-desc">Café frappé, lait, caramel salé &amp; glaçons</div>
+            <div class="item-footer">
+              <span class="item-price">550 DA</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CATEGORY: PIZZAS & TACOS ─── -->
+    <section class="category" id="cat-pizzas">
+      <div class="category-header">
+        <span class="category-icon">🍕</span>
+        <div>
+          <h2 class="category-title">Pizzas &amp; Tacos</h2>
+          <p class="category-subtitle">Savoureux &amp; Généreux</p>
+        </div>
+        <span class="category-count">06</span>
+      </div>
+      <div class="menu-grid">
+        <div class="menu-item">
+          <div class="item-img">🍕</div>
+          <div class="item-info">
+            <div class="item-name">Pizza MEGA Angora</div>
+            <div class="item-desc">Mozzarella fondante, pepperoni, poivrons &amp; basilic frais</div>
+            <div class="item-footer">
+              <span class="item-price">2000 DA</span>
+              <span class="item-badge">Signature</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🍕</div>
+          <div class="item-info">
+            <div class="item-name">Pizza 4 Fromages</div>
+            <div class="item-desc">Mozzarella, gorgonzola, parmesan &amp; chèvre</div>
+            <div class="item-footer">
+              <span class="item-price">1800 DA</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🌮</div>
+          <div class="item-info">
+            <div class="item-name">Taco Poulet Croquant</div>
+            <div class="item-desc">Poulet croustillant, salade, tomate &amp; sauce blanche</div>
+            <div class="item-footer">
+              <span class="item-price">900 DA</span>
+              <span class="item-badge">Best-seller</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🌮</div>
+          <div class="item-info">
+            <div class="item-name">Taco Angora</div>
+            <div class="item-desc">Viande hachée épicée, fromage fondant &amp; sauce secrète</div>
+            <div class="item-footer">
+              <span class="item-price">1100 DA</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🍕</div>
+          <div class="item-info">
+            <div class="item-name">Pizza Margherita</div>
+            <div class="item-desc">Tomate, mozzarella di bufala &amp; basilic — l'intemporelle</div>
+            <div class="item-footer">
+              <span class="item-price">1500 DA</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-item">
+          <div class="item-img">🌯</div>
+          <div class="item-info">
+            <div class="item-name">Taco Bœuf &amp; Avocat</div>
+            <div class="item-desc">Bœuf grillé, guacamole, salsa &amp; crème sûre</div>
+            <div class="item-footer">
+              <span class="item-price">1200 DA</span>
+              <span class="item-badge">Premium</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GLOW LINE -->
+    <div class="glow-line"></div>
+
+    <!-- FOOTER -->
+    <footer>
+      <p><span class="gold-text">Cafeteria Angora</span> &bull; Luxury Menu Digital</p>
+      <p style="margin-top: 4px;">~ L'élégance à chaque bouchée ~</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // ─── PARTICLES ───
+    (function initParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 40; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+        p.style.animationDuration = (10 + Math.random() * 20) + 's';
+        p.style.animationDelay = (Math.random() * 20) + 's';
+        if (Math.random() > 0.5) p.style.background = 'var(--blue-neon)';
+        container.appendChild(p);
+      }
+    })();
+
+    // ─── SPARKLE TRAIL ───
+    (function initSparkles() {
+      const trail = document.getElementById('sparkleTrail');
+      for (let i = 0; i < 8; i++) {
+        const s = document.createElement('div');
+        s.className = 'sparkle';
+        s.style.left = (5 + Math.random() * 90) + '%';
+        s.style.top = (5 + Math.random() * 90) + '%';
+        s.style.animationDelay = (i * 0.4) + 's';
+        s.style.width = s.style.height = (3 + Math.random() * 5) + 'px';
+        trail.appendChild(s);
+      }
+    })();
+
+    // ─── NAV SCROLL ───
+    document.querySelectorAll('.nav-dot').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.cat;
+        document.querySelectorAll('.nav-dot').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const target = document.getElementById('cat-' + cat);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Highlight animation
+          document.querySelectorAll('.category').forEach(c => c.classList.remove('visible'));
+          target.classList.add('visible');
+          setTimeout(() => {
+            document.querySelectorAll('.category').forEach(c => c.classList.add('visible'));
+          }, 100);
+        }
+      });
+    });
+
+    // ─── INTERSECTION OBSERVER ───
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.category').forEach(c => observer.observe(c));
+
+    // ─── REVEAL ALL VISIBLE ON LOAD ───
+    setTimeout(() => {
+      document.querySelectorAll('.category').forEach(c => c.classList.add('visible'));
+    }, 200);
+
+    // ─── CAT WRAPPER DIRECTION ───
+    const catWrapper = document.getElementById('catWrapper');
+    let lastLeft = -10;
+
+    setInterval(() => {
+      const rect = catWrapper.getBoundingClientRect();
+      const parent = catWrapper.parentElement.getBoundingClientRect();
+      const leftPct = ((rect.left - parent.left) / parent.width) * 100;
+
+      if (leftPct < lastLeft) {
+        // going left
+        catWrapper.querySelector('.cat-svg').style.transform = 'scaleX(-1)';
+      } else {
+        catWrapper.querySelector('.cat-svg').style.transform = 'scaleX(1)';
+      }
+      // Reset transform for float animation — handled by CSS, so we need to be careful
+      // Actually let CSS handle the float, we only add scale for direction
+      const svg = catWrapper.querySelector('.cat-svg');
+      svg.style.setProperty('--direction', leftPct < lastLeft ? '-1' : '1');
+
+      lastLeft = leftPct;
+    }, 500);
+  </script>
+</body>
+</html>
