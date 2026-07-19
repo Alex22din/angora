@@ -46,6 +46,18 @@ class FooterSection extends StatelessWidget {
                 T.allRightsReserved,
                 style: GoogleFonts.plusJakartaSans(fontSize: 12, color: textDim),
               ),
+              const SizedBox(height: AppSpacing.sm),
+              GestureDetector(
+                onTap: () => launchUrl(Uri.parse('https://rahoahmedalaaeddine.online')),
+                child: Text(
+                  'Made by Raho Ahmed Alaaeddine',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: textDim,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
             ],
           ),
         );
