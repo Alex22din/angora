@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/theme_service.dart';
 import '../services/language_service.dart';
+import '../services/search_service.dart';
 import '../screens/admin/admin_login_screen.dart';
 import '../l10n/translations.dart';
 
@@ -16,6 +17,14 @@ class AngoraNavBar extends StatefulWidget {
 class _AngoraNavBarState extends State<AngoraNavBar> {
   int _tapCount = 0;
   DateTime? _lastTapTime;
+  final _searchController = TextEditingController();
+  final _searchService = SearchService();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _onLogoTap() {
     final now = DateTime.now();
@@ -110,10 +119,12 @@ class _AngoraNavBarState extends State<AngoraNavBar> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: TextField(
+                          controller: _searchController,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 14,
                             color: textPrimary,
                           ),
+                          onChanged: (value) => _searchService.setQuery(value),
                           decoration: InputDecoration(
                             hintText: T.searchHint,
                             hintStyle: GoogleFonts.plusJakartaSans(
@@ -125,6 +136,17 @@ class _AngoraNavBarState extends State<AngoraNavBar> {
                           ),
                         ),
                       ),
+                      if (_searchService.query.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            _searchController.clear();
+                            _searchService.clear();
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Icon(Icons.close, color: textDim, size: 18),
+                          ),
+                        ),
                     ],
                   ),
                 ),
