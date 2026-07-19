@@ -5,7 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../helpers/io_helper.dart' as io;
 import '../theme/app_theme.dart';
 import '../services/theme_service.dart';
+import '../services/language_service.dart';
 import '../models/menu_data.dart';
+import '../l10n/translations.dart';
 
 class MenuItemDetailDialog extends StatelessWidget {
   final MenuItem item;
@@ -27,7 +29,7 @@ class MenuItemDetailDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: ThemeService(),
+      listenable: Listenable.merge([ThemeService(), LanguageService()]),
       builder: (context, _) {
         final isNight = ThemeService().isNight;
         final primary = AppColorsHelper.primary(isNight);
@@ -36,6 +38,8 @@ class MenuItemDetailDialog extends StatelessWidget {
         final textDim = AppColorsHelper.textDim(isNight);
         final cardBg = AppColorsHelper.cardBg(isNight);
         final border = AppColorsHelper.border(isNight);
+
+        final ingredients = item.localizedIngredients;
 
         return Dialog(
           backgroundColor: Colors.transparent,
@@ -58,7 +62,6 @@ class MenuItemDetailDialog extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Image section
                   Container(
                     width: double.infinity,
                     height: 200,
@@ -81,7 +84,6 @@ class MenuItemDetailDialog extends StatelessWidget {
                             ),
                     ),
                   ),
-                  // Details
                   Flexible(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -96,7 +98,7 @@ class MenuItemDetailDialog extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      item.name,
+                                      item.localizedName,
                                       style: GoogleFonts.cinzel(
                                         fontSize: 20,
                                         fontWeight: FontWeight.w600,
@@ -104,11 +106,11 @@ class MenuItemDetailDialog extends StatelessWidget {
                                         letterSpacing: 1,
                                       ),
                                     ),
-                                    if (item.description != null && item.description!.isNotEmpty)
+                                    if (item.localizedDescription != null && item.localizedDescription!.isNotEmpty)
                                       Padding(
                                         padding: const EdgeInsets.only(top: 6),
                                         child: Text(
-                                          item.description!,
+                                          item.localizedDescription!,
                                           style: GoogleFonts.plusJakartaSans(
                                             fontSize: 14,
                                             color: textMuted,
@@ -164,7 +166,7 @@ class MenuItemDetailDialog extends StatelessWidget {
                           Container(height: 1, color: border),
                           const SizedBox(height: AppSpacing.lg),
                           Text(
-                            'INGREDIENTS',
+                            T.ingredients,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -173,11 +175,11 @@ class MenuItemDetailDialog extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: AppSpacing.sm),
-                          if (item.ingredients != null && item.ingredients!.isNotEmpty)
+                          if (ingredients != null && ingredients.isNotEmpty)
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
-                              children: item.ingredients!.map((ing) {
+                              children: ingredients.map((ing) {
                                 return Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
@@ -197,7 +199,7 @@ class MenuItemDetailDialog extends StatelessWidget {
                             )
                           else
                             Text(
-                              'No ingredients listed',
+                              T.noIngredients,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 color: textDim,
@@ -207,7 +209,6 @@ class MenuItemDetailDialog extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Close button
                   Padding(
                     padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
                     child: SizedBox(
@@ -224,7 +225,7 @@ class MenuItemDetailDialog extends StatelessWidget {
                           elevation: 0,
                         ),
                         child: Text(
-                          'Close',
+                          T.close,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,

@@ -16,6 +16,10 @@ class AdminCategoryForm extends StatefulWidget {
 class _AdminCategoryFormState extends State<AdminCategoryForm> {
   late TextEditingController _nameController;
   late TextEditingController _iconController;
+  late TextEditingController _nameEnController;
+  late TextEditingController _nameArController;
+
+  bool _showTranslations = false;
 
   static const List<String> _emojiSuggestions = [
     '🥞', '☕', '🥤', '🍕', '🍔', '🍰', '🎂', '🧁', '🍩',
@@ -28,12 +32,16 @@ class _AdminCategoryFormState extends State<AdminCategoryForm> {
     super.initState();
     _nameController = TextEditingController(text: widget.category?.name ?? '');
     _iconController = TextEditingController(text: widget.category?.icon ?? '');
+    _nameEnController = TextEditingController(text: widget.category?.nameEn ?? '');
+    _nameArController = TextEditingController(text: widget.category?.nameAr ?? '');
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _iconController.dispose();
+    _nameEnController.dispose();
+    _nameArController.dispose();
     super.dispose();
   }
 
@@ -57,6 +65,8 @@ class _AdminCategoryFormState extends State<AdminCategoryForm> {
     final result = MenuCategory(
       id: widget.category?.id,
       name: name,
+      nameEn: _nameEnController.text.trim().isEmpty ? null : _nameEnController.text.trim(),
+      nameAr: _nameArController.text.trim().isEmpty ? null : _nameArController.text.trim(),
       icon: icon,
       subcategories: widget.category?.subcategories,
       items: widget.category?.items,
@@ -99,49 +109,14 @@ class _AdminCategoryFormState extends State<AdminCategoryForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Name
-                Text(
-                  'Category Name',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: textPrimary,
-                  ),
-                ),
+                // Name (FR)
+                _buildLabelWithFlag('Category Name', 'FR', textPrimary),
                 const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: _nameController,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 15, color: textPrimary),
-                  decoration: InputDecoration(
-                    hintText: 'e.g. Gourmandises',
-                    hintStyle: GoogleFonts.plusJakartaSans(color: textMuted),
-                    filled: true,
-                    fillColor: cardBg,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                      borderSide: BorderSide(color: border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                      borderSide: BorderSide(color: border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                      borderSide: BorderSide(color: primary, width: 2),
-                    ),
-                  ),
-                ),
+                _buildTextField(_nameController, 'e.g. Gourmandises', textMuted, textPrimary, border, cardBg, primary),
                 const SizedBox(height: AppSpacing.lg),
 
                 // Icon
-                Text(
-                  'Icon (Emoji)',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: textPrimary,
-                  ),
-                ),
+                _buildLabel('Icon (Emoji)', textPrimary),
                 const SizedBox(height: AppSpacing.sm),
                 TextField(
                   controller: _iconController,
@@ -214,19 +189,91 @@ class _AdminCategoryFormState extends State<AdminCategoryForm> {
                         if (_nameController.text.isNotEmpty) ...[
                           const SizedBox(width: 12),
                           Expanded(
-                            child: Text(
-                              _nameController.text,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: textPrimary,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _nameController.text,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: textPrimary,
+                                  ),
+                                ),
+                                if (_nameEnController.text.isNotEmpty)
+                                  Text(
+                                    _nameEnController.text,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13,
+                                      color: textMuted,
+                                    ),
+                                  ),
+                                if (_nameArController.text.isNotEmpty)
+                                  Text(
+                                    _nameArController.text,
+                                    textDirection: TextDirection.rtl,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13,
+                                      color: textMuted,
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ],
                       ],
                     ),
                   ),
+                const SizedBox(height: AppSpacing.xl),
+
+                // ── Translations Toggle ──
+                GestureDetector(
+                  onTap: () => setState(() => _showTranslations = !_showTranslations),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      border: Border.all(color: border),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.language, size: 20, color: primary),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Translations (EN / AR)',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: textPrimary,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          _showTranslations ? Icons.expand_less : Icons.expand_more,
+                          color: textMuted,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                if (_showTranslations) ...[
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Name (EN)
+                  _buildLabelWithFlag('Category Name', 'EN', textPrimary),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildTextField(_nameEnController, 'e.g. Sweet Treats', textMuted, textPrimary, border, cardBg, primary),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Name (AR)
+                  _buildLabelWithFlag('Category Name', 'AR', textPrimary),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildTextField(_nameArController, '...الحلويات', textMuted, textPrimary, border, cardBg, primary, isRtl: true),
+                ],
                 const SizedBox(height: AppSpacing.xl),
 
                 // Save button
@@ -257,6 +304,70 @@ class _AdminCategoryFormState extends State<AdminCategoryForm> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildLabel(String text, Color color) {
+    return Text(
+      text,
+      style: GoogleFonts.plusJakartaSans(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: color,
+      ),
+    );
+  }
+
+  Widget _buildLabelWithFlag(String text, String lang, Color color) {
+    final flags = {'FR': '🇫🇷', 'EN': '🇬🇧', 'AR': '🇸🇦'};
+    return Row(
+      children: [
+        Text(flags[lang] ?? '', style: const TextStyle(fontSize: 14)),
+        const SizedBox(width: 6),
+        Text(
+          '$text ($lang)',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    String hint,
+    Color textMuted,
+    Color textPrimary,
+    Color border,
+    Color cardBg,
+    Color primary, {
+    bool isRtl = false,
+  }) {
+    return TextField(
+      controller: controller,
+      textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+      style: GoogleFonts.plusJakartaSans(fontSize: 15, color: textPrimary),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.plusJakartaSans(color: textMuted),
+        filled: true,
+        fillColor: cardBg,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          borderSide: BorderSide(color: border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          borderSide: BorderSide(color: border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          borderSide: BorderSide(color: primary, width: 2),
+        ),
+      ),
     );
   }
 }

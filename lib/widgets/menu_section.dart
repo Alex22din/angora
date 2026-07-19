@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/theme_service.dart';
+import '../services/language_service.dart';
 import '../models/menu_data.dart';
 import '../models/menu_data_manager.dart';
+import '../l10n/translations.dart';
 import 'menu_item_card.dart';
 
 class MenuSection extends StatefulWidget {
@@ -21,11 +23,13 @@ class _MenuSectionState extends State<MenuSection> {
   void initState() {
     super.initState();
     _manager.addListener(_onDataChanged);
+    LanguageService().addListener(_onDataChanged);
   }
 
   @override
   void dispose() {
     _manager.removeListener(_onDataChanged);
+    LanguageService().removeListener(_onDataChanged);
     super.dispose();
   }
 
@@ -44,7 +48,7 @@ class _MenuSectionState extends State<MenuSection> {
     }
 
     return ListenableBuilder(
-      listenable: ThemeService(),
+      listenable: Listenable.merge([ThemeService(), LanguageService()]),
       builder: (context, _) {
         final isNight = ThemeService().isNight;
         final primary = AppColorsHelper.primary(isNight);
@@ -76,7 +80,7 @@ class _MenuSectionState extends State<MenuSection> {
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Text(
-                    'Our Menu',
+                    T.ourMenu,
                     style: GoogleFonts.cinzel(
                       fontSize: isPhone ? 22 : 28,
                       fontWeight: FontWeight.w600,
@@ -140,7 +144,7 @@ class _MenuSectionState extends State<MenuSection> {
                   Text(cat.icon, style: TextStyle(fontSize: isPhone ? 16 : 18)),
                   const SizedBox(width: 6),
                   Text(
-                    cat.name,
+                    cat.localizedName,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: isPhone ? 12 : 14,
                       fontWeight: FontWeight.w600,
@@ -183,7 +187,7 @@ class _MenuSectionState extends State<MenuSection> {
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
-                      sub.name,
+                      sub.localizedName,
                       style: GoogleFonts.cinzel(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

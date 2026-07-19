@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/theme_service.dart';
+import '../services/language_service.dart';
 import '../screens/admin/admin_login_screen.dart';
+import '../l10n/translations.dart';
 
 class AngoraNavBar extends StatefulWidget {
   const AngoraNavBar({super.key});
@@ -37,7 +39,7 @@ class _AngoraNavBarState extends State<AngoraNavBar> {
     final isPhone = screenWidth < 600;
 
     return ListenableBuilder(
-      listenable: ThemeService(),
+      listenable: Listenable.merge([ThemeService(), LanguageService()]),
       builder: (context, _) {
         final isNight = ThemeService().isNight;
         final primary = AppColorsHelper.primary(isNight);
@@ -86,13 +88,9 @@ class _AngoraNavBarState extends State<AngoraNavBar> {
                     ),
                   ),
                   if (!isPhone)
-                    Icon(
-                      Icons.shopping_cart_outlined,
-                      color: primary,
-                      size: 22,
-                    )
+                    _buildLanguageSelector(primary, textPrimary, cardBg, border)
                   else
-                    const SizedBox(width: 100),
+                    _buildLanguageSelector(primary, textPrimary, cardBg, border),
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
@@ -117,7 +115,7 @@ class _AngoraNavBarState extends State<AngoraNavBar> {
                             color: textPrimary,
                           ),
                           decoration: InputDecoration(
-                            hintText: 'Search for dishes...',
+                            hintText: T.searchHint,
                             hintStyle: GoogleFonts.plusJakartaSans(
                               fontSize: 14,
                               color: textDim,
@@ -135,6 +133,50 @@ class _AngoraNavBarState extends State<AngoraNavBar> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildLanguageSelector(Color primary, Color textPrimary, Color cardBg, Color border) {
+    final currentLang = LanguageService().currentLanguage;
+    return Container(
+      height: 36,
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _langButton('FR', 'fr', currentLang, primary, textPrimary),
+          Container(width: 1, height: 20, color: border),
+          _langButton('EN', 'en', currentLang, primary, textPrimary),
+          Container(width: 1, height: 20, color: border),
+          _langButton('ع', 'ar', currentLang, primary, textPrimary),
+        ],
+      ),
+    );
+  }
+
+  Widget _langButton(String label, String code, String current, Color primary, Color textPrimary) {
+    final isSelected = code == current;
+    return GestureDetector(
+      onTap: () => LanguageService().setLanguage(code),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: isSelected ? Colors.white : textPrimary.withValues(alpha: 0.6),
+          ),
+        ),
+      ),
     );
   }
 }

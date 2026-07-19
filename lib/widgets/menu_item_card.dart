@@ -5,7 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../helpers/io_helper.dart' as io;
 import '../theme/app_theme.dart';
 import '../services/theme_service.dart';
+import '../services/language_service.dart';
 import '../models/menu_data.dart';
+import '../l10n/translations.dart';
 import 'menu_item_detail_dialog.dart';
 
 class MenuItemCard extends StatelessWidget {
@@ -24,7 +26,7 @@ class MenuItemCard extends StatelessWidget {
     final isPhone = screenWidth < 600;
 
     return ListenableBuilder(
-      listenable: ThemeService(),
+      listenable: Listenable.merge([ThemeService(), LanguageService()]),
       builder: (context, _) {
         final isNight = ThemeService().isNight;
         final primary = AppColorsHelper.primary(isNight);
@@ -32,6 +34,8 @@ class MenuItemCard extends StatelessWidget {
         final textMuted = AppColorsHelper.textMuted(isNight);
         final textDim = AppColorsHelper.textDim(isNight);
         final cardBg = AppColorsHelper.cardBg(isNight);
+
+        final ingredients = item.localizedIngredients;
 
         return GestureDetector(
           onTap: () => MenuItemDetailDialog.show(context, item, categoryIcon),
@@ -73,17 +77,17 @@ class MenuItemCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item.name,
+                        item.localizedName,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: isPhone ? 14 : 18,
                           fontWeight: FontWeight.w600,
                           color: primary,
                         ),
                       ),
-                      if (item.description != null && item.description!.isNotEmpty) ...[
+                      if (item.localizedDescription != null && item.localizedDescription!.isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Text(
-                          item.description!,
+                          item.localizedDescription!,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: isPhone ? 11 : 13,
                             color: textMuted,
@@ -95,7 +99,7 @@ class MenuItemCard extends StatelessWidget {
                       ],
                       const SizedBox(height: 6),
                       Text(
-                        item.ingredients != null ? '${item.ingredients!.length} ingredients' : '',
+                        ingredients != null ? T.ingredientsCount(ingredients.length) : '',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           color: textDim,
@@ -110,7 +114,7 @@ class MenuItemCard extends StatelessWidget {
                   children: [
                     Text(
                       item.isMultiPriced
-                          ? 'From ${item.prices?.values.first ?? 0} DA'
+                          ? '${T.from} ${item.prices?.values.first ?? 0} DA'
                           : '${item.price ?? 0} DA',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: isPhone ? 14 : 18,
@@ -120,7 +124,7 @@ class MenuItemCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'View details >',
+                      T.viewDetails,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,

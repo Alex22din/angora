@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/theme_service.dart';
+import '../services/language_service.dart';
+import '../l10n/translations.dart';
 
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
@@ -12,7 +14,7 @@ class FooterSection extends StatelessWidget {
     final isPhone = screenWidth < 600;
 
     return ListenableBuilder(
-      listenable: ThemeService(),
+      listenable: Listenable.merge([ThemeService(), LanguageService()]),
       builder: (context, _) {
         final isNight = ThemeService().isNight;
         final primary = AppColorsHelper.primary(isNight);
@@ -36,7 +38,7 @@ class FooterSection extends StatelessWidget {
               Container(height: 1, width: double.infinity, color: border),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Cafeteria Angora. All rights reserved.',
+                T.allRightsReserved,
                 style: GoogleFonts.plusJakartaSans(fontSize: 12, color: textDim),
               ),
             ],
@@ -87,7 +89,7 @@ class FooterSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'For Reservations',
+              T.forReservations,
               style: GoogleFonts.plusJakartaSans(fontSize: 11, color: textDim),
             ),
             Text(
@@ -128,7 +130,7 @@ class FooterSection extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Follow Us',
+          T.followUs,
           style: GoogleFonts.plusJakartaSans(fontSize: 11, color: textDim),
         ),
         const SizedBox(width: AppSpacing.sm),

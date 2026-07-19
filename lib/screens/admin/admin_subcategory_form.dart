@@ -20,16 +20,24 @@ class AdminSubcategoryForm extends StatefulWidget {
 
 class _AdminSubcategoryFormState extends State<AdminSubcategoryForm> {
   late TextEditingController _nameController;
+  late TextEditingController _nameEnController;
+  late TextEditingController _nameArController;
+
+  bool _showTranslations = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.subcategory?.name ?? '');
+    _nameEnController = TextEditingController(text: widget.subcategory?.nameEn ?? '');
+    _nameArController = TextEditingController(text: widget.subcategory?.nameAr ?? '');
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _nameEnController.dispose();
+    _nameArController.dispose();
     super.dispose();
   }
 
@@ -46,6 +54,8 @@ class _AdminSubcategoryFormState extends State<AdminSubcategoryForm> {
     final result = MenuSubcategory(
       id: widget.subcategory?.id,
       name: name,
+      nameEn: _nameEnController.text.trim().isEmpty ? null : _nameEnController.text.trim(),
+      nameAr: _nameArController.text.trim().isEmpty ? null : _nameArController.text.trim(),
       items: widget.subcategory?.items ?? [],
     );
 
@@ -85,40 +95,62 @@ class _AdminSubcategoryFormState extends State<AdminSubcategoryForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Subcategory Name',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: textPrimary,
-                  ),
-                ),
+                // Name (FR)
+                _buildLabelWithFlag('Subcategory Name', 'FR', textPrimary),
                 const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: _nameController,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 15, color: textPrimary),
-                  decoration: InputDecoration(
-                    hintText: 'e.g. Crêpes Classiques',
-                    hintStyle: GoogleFonts.plusJakartaSans(color: textMuted),
-                    filled: true,
-                    fillColor: cardBg,
-                    border: OutlineInputBorder(
+                _buildTextField(_nameController, 'e.g. Crêpes Classiques', textMuted, textPrimary, border, cardBg, primary),
+                const SizedBox(height: AppSpacing.lg),
+
+                // ── Translations Toggle ──
+                GestureDetector(
+                  onTap: () => setState(() => _showTranslations = !_showTranslations),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: cardBg,
                       borderRadius: BorderRadius.circular(AppRadius.sm),
-                      borderSide: BorderSide(color: border),
+                      border: Border.all(color: border),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                      borderSide: BorderSide(color: border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                      borderSide: BorderSide(color: primary, width: 2),
+                    child: Row(
+                      children: [
+                        Icon(Icons.language, size: 20, color: primary),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Translations (EN / AR)',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: textPrimary,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          _showTranslations ? Icons.expand_less : Icons.expand_more,
+                          color: textMuted,
+                        ),
+                      ],
                     ),
                   ),
-                  autofocus: true,
-                  onSubmitted: (_) => _save(),
                 ),
+
+                if (_showTranslations) ...[
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Name (EN)
+                  _buildLabelWithFlag('Subcategory Name', 'EN', textPrimary),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildTextField(_nameEnController, 'e.g. Classic Crêpes', textMuted, textPrimary, border, cardBg, primary),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Name (AR)
+                  _buildLabelWithFlag('Subcategory Name', 'AR', textPrimary),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildTextField(_nameArController, '...كريب كلاسيكي', textMuted, textPrimary, border, cardBg, primary, isRtl: true),
+                ],
                 const SizedBox(height: AppSpacing.xl),
+
                 SizedBox(
                   width: double.infinity,
                   height: 48,
@@ -146,6 +178,61 @@ class _AdminSubcategoryFormState extends State<AdminSubcategoryForm> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildLabelWithFlag(String text, String lang, Color color) {
+    final flags = {'FR': '🇫🇷', 'EN': '🇬🇧', 'AR': '🇸🇦'};
+    return Row(
+      children: [
+        Text(flags[lang] ?? '', style: const TextStyle(fontSize: 14)),
+        const SizedBox(width: 6),
+        Text(
+          '$text ($lang)',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    String hint,
+    Color textMuted,
+    Color textPrimary,
+    Color border,
+    Color cardBg,
+    Color primary, {
+    bool isRtl = false,
+  }) {
+    return TextField(
+      controller: controller,
+      textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+      style: GoogleFonts.plusJakartaSans(fontSize: 15, color: textPrimary),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.plusJakartaSans(color: textMuted),
+        filled: true,
+        fillColor: cardBg,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          borderSide: BorderSide(color: border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          borderSide: BorderSide(color: border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          borderSide: BorderSide(color: primary, width: 2),
+        ),
+      ),
+      autofocus: true,
+      onSubmitted: (_) => _save(),
     );
   }
 }

@@ -34,12 +34,23 @@ class _AdminItemFormState extends State<AdminItemForm> {
   final _multiPriceKeyController = TextEditingController();
   final _multiPriceValueController = TextEditingController();
 
+  final _nameEnController = TextEditingController();
+  final _nameArController = TextEditingController();
+  final _descEnController = TextEditingController();
+  final _descArController = TextEditingController();
+  final _ingredientEnController = TextEditingController();
+  final _ingredientArController = TextEditingController();
+
   bool _isMultiPriced = false;
   Map<String, int> _prices = {};
   List<String> _ingredients = [];
+  List<String>? _ingredientsEn;
+  List<String>? _ingredientsAr;
   Uint8List? _pickedImageBytes;
   String? _pickedImageExt;
   String? _existingImageUrl;
+
+  bool _showTranslations = false;
 
   @override
   void initState() {
@@ -52,7 +63,14 @@ class _AdminItemFormState extends State<AdminItemForm> {
       _isMultiPriced = item.isMultiPriced;
       _prices = Map.from(item.prices ?? {});
       _ingredients = List.from(item.ingredients ?? []);
+      _ingredientsEn = item.ingredientsEn != null ? List.from(item.ingredientsEn!) : null;
+      _ingredientsAr = item.ingredientsAr != null ? List.from(item.ingredientsAr!) : null;
       _existingImageUrl = item.imageUrl;
+
+      _nameEnController.text = item.nameEn ?? '';
+      _nameArController.text = item.nameAr ?? '';
+      _descEnController.text = item.descriptionEn ?? '';
+      _descArController.text = item.descriptionAr ?? '';
     }
   }
 
@@ -64,6 +82,12 @@ class _AdminItemFormState extends State<AdminItemForm> {
     _ingredientController.dispose();
     _multiPriceKeyController.dispose();
     _multiPriceValueController.dispose();
+    _nameEnController.dispose();
+    _nameArController.dispose();
+    _descEnController.dispose();
+    _descArController.dispose();
+    _ingredientEnController.dispose();
+    _ingredientArController.dispose();
     super.dispose();
   }
 
@@ -96,6 +120,42 @@ class _AdminItemFormState extends State<AdminItemForm> {
 
   void _removeIngredient(int index) {
     setState(() => _ingredients.removeAt(index));
+  }
+
+  void _addIngredientEn() {
+    final text = _ingredientEnController.text.trim();
+    if (text.isNotEmpty) {
+      setState(() {
+        _ingredientsEn ??= [];
+        _ingredientsEn!.add(text);
+        _ingredientEnController.clear();
+      });
+    }
+  }
+
+  void _removeIngredientEn(int index) {
+    setState(() {
+      _ingredientsEn?.removeAt(index);
+      if (_ingredientsEn != null && _ingredientsEn!.isEmpty) _ingredientsEn = null;
+    });
+  }
+
+  void _addIngredientAr() {
+    final text = _ingredientArController.text.trim();
+    if (text.isNotEmpty) {
+      setState(() {
+        _ingredientsAr ??= [];
+        _ingredientsAr!.add(text);
+        _ingredientArController.clear();
+      });
+    }
+  }
+
+  void _removeIngredientAr(int index) {
+    setState(() {
+      _ingredientsAr?.removeAt(index);
+      if (_ingredientsAr != null && _ingredientsAr!.isEmpty) _ingredientsAr = null;
+    });
   }
 
   void _addPriceEntry() {
@@ -140,13 +200,19 @@ class _AdminItemFormState extends State<AdminItemForm> {
     final result = MenuItem(
       id: widget.item?.id,
       name: name,
+      nameEn: _nameEnController.text.trim().isEmpty ? null : _nameEnController.text.trim(),
+      nameAr: _nameArController.text.trim().isEmpty ? null : _nameArController.text.trim(),
       description: _descriptionController.text.trim().isEmpty
           ? null
           : _descriptionController.text.trim(),
+      descriptionEn: _descEnController.text.trim().isEmpty ? null : _descEnController.text.trim(),
+      descriptionAr: _descArController.text.trim().isEmpty ? null : _descArController.text.trim(),
       price: _isMultiPriced ? null : price,
       isMultiPriced: _isMultiPriced,
       prices: _isMultiPriced && _prices.isNotEmpty ? _prices : null,
       ingredients: _ingredients.isNotEmpty ? _ingredients : null,
+      ingredientsEn: _ingredientsEn,
+      ingredientsAr: _ingredientsAr,
       imageUrl: savedImageUrl,
     );
 
@@ -189,14 +255,7 @@ class _AdminItemFormState extends State<AdminItemForm> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ── Image Picker ──
-                Text(
-                  'Item Image',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: textPrimary,
-                  ),
-                ),
+                _buildLabel('Item Image', textPrimary),
                 const SizedBox(height: AppSpacing.sm),
                 GestureDetector(
                   onTap: _pickImage,
@@ -280,14 +339,14 @@ class _AdminItemFormState extends State<AdminItemForm> {
                 ),
                 const SizedBox(height: AppSpacing.xl),
 
-                // ── Name ──
-                _buildLabel('Name', textPrimary),
+                // ── Name (FR) ──
+                _buildLabelWithFlag('Name', 'FR', textPrimary),
                 const SizedBox(height: AppSpacing.sm),
                 _buildTextField(_nameController, 'e.g. Pizza Marguerite', textMuted, textPrimary, border, cardBg, primary, isNight),
                 const SizedBox(height: AppSpacing.lg),
 
-                // ── Description ──
-                _buildLabel('Description (optional)', textPrimary),
+                // ── Description (FR) ──
+                _buildLabelWithFlag('Description', 'FR', textPrimary),
                 const SizedBox(height: AppSpacing.sm),
                 _buildTextField(_descriptionController, 'Short description...', textMuted, textPrimary, border, cardBg, primary, isNight),
                 const SizedBox(height: AppSpacing.lg),
@@ -311,7 +370,6 @@ class _AdminItemFormState extends State<AdminItemForm> {
                   const SizedBox(height: AppSpacing.sm),
                   _buildTextField(_priceController, 'e.g. 300', textMuted, textPrimary, border, cardBg, primary, isNight, isNumber: true),
                 ] else ...[
-                  // Multi-price entries
                   ..._prices.entries.map((e) => Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Container(
@@ -361,8 +419,8 @@ class _AdminItemFormState extends State<AdminItemForm> {
                 ],
                 const SizedBox(height: AppSpacing.lg),
 
-                // ── Ingredients ──
-                _buildLabel('Ingredients', textPrimary),
+                // ── Ingredients (FR) ──
+                _buildLabelWithFlag('Ingredients', 'FR', textPrimary),
                 const SizedBox(height: AppSpacing.sm),
                 if (_ingredients.isNotEmpty)
                   Wrap(
@@ -400,6 +458,144 @@ class _AdminItemFormState extends State<AdminItemForm> {
                     ),
                   ],
                 ),
+                const SizedBox(height: AppSpacing.xl),
+
+                // ── Translations Toggle ──
+                GestureDetector(
+                  onTap: () => setState(() => _showTranslations = !_showTranslations),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      border: Border.all(color: border),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.language, size: 20, color: primary),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Translations (EN / AR)',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: textPrimary,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          _showTranslations ? Icons.expand_less : Icons.expand_more,
+                          color: textMuted,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                if (_showTranslations) ...[
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Name (EN) ──
+                  _buildLabelWithFlag('Name', 'EN', textPrimary),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildTextField(_nameEnController, 'English name...', textMuted, textPrimary, border, cardBg, primary, isNight),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Name (AR) ──
+                  _buildLabelWithFlag('Name', 'AR', textPrimary),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildTextField(_nameArController, '...اسم بالعربية', textMuted, textPrimary, border, cardBg, primary, isNight, isRtl: true),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Description (EN) ──
+                  _buildLabelWithFlag('Description', 'EN', textPrimary),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildTextField(_descEnController, 'English description...', textMuted, textPrimary, border, cardBg, primary, isNight),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Description (AR) ──
+                  _buildLabelWithFlag('Description', 'AR', textPrimary),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildTextField(_descArController, '...وصف بالعربية', textMuted, textPrimary, border, cardBg, primary, isNight, isRtl: true),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Ingredients (EN) ──
+                  _buildLabelWithFlag('Ingredients', 'EN', textPrimary),
+                  const SizedBox(height: AppSpacing.sm),
+                  if (_ingredientsEn != null && _ingredientsEn!.isNotEmpty)
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: List.generate(_ingredientsEn!.length, (i) {
+                        return Chip(
+                          label: Text(
+                            _ingredientsEn![i],
+                            style: GoogleFonts.plusJakartaSans(fontSize: 12, color: textPrimary),
+                          ),
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                          onDeleted: () => _removeIngredientEn(i),
+                          backgroundColor: cardBg,
+                          side: BorderSide(color: border),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                          ),
+                        );
+                      }),
+                    ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(_ingredientEnController, 'Add ingredient (EN)...', textMuted, textPrimary, border, cardBg, primary, isNight),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      IconButton(
+                        onPressed: _addIngredientEn,
+                        icon: Icon(Icons.add_circle, color: primary, size: 32),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Ingredients (AR) ──
+                  _buildLabelWithFlag('Ingredients', 'AR', textPrimary),
+                  const SizedBox(height: AppSpacing.sm),
+                  if (_ingredientsAr != null && _ingredientsAr!.isNotEmpty)
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: List.generate(_ingredientsAr!.length, (i) {
+                        return Chip(
+                          label: Text(
+                            _ingredientsAr![i],
+                            style: GoogleFonts.plusJakartaSans(fontSize: 12, color: textPrimary),
+                          ),
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                          onDeleted: () => _removeIngredientAr(i),
+                          backgroundColor: cardBg,
+                          side: BorderSide(color: border),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                          ),
+                        );
+                      }),
+                    ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(_ingredientArController, '...أضف مكوّن', textMuted, textPrimary, border, cardBg, primary, isNight, isRtl: true),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      IconButton(
+                        onPressed: _addIngredientAr,
+                        icon: Icon(Icons.add_circle, color: primary, size: 32),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xl),
 
                 // ── Save ──
@@ -444,6 +640,27 @@ class _AdminItemFormState extends State<AdminItemForm> {
     );
   }
 
+  Widget _buildLabelWithFlag(String text, String lang, Color color) {
+    final flags = {'FR': '🇫🇷', 'EN': '🇬🇧', 'AR': '🇸🇦'};
+    return Row(
+      children: [
+        Text(
+          flags[lang] ?? '',
+          style: const TextStyle(fontSize: 14),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '$text ($lang)',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTextField(
     TextEditingController controller,
     String hint,
@@ -454,10 +671,12 @@ class _AdminItemFormState extends State<AdminItemForm> {
     Color primary,
     bool isNight, {
     bool isNumber = false,
+    bool isRtl = false,
   }) {
     return TextField(
       controller: controller,
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
       style: GoogleFonts.plusJakartaSans(fontSize: 15, color: textPrimary),
       decoration: InputDecoration(
         hintText: hint,

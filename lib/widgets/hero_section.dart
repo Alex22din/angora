@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/theme_service.dart';
+import '../services/language_service.dart';
+import '../l10n/translations.dart';
 import 'wave_separator.dart';
 
 class HeroSection extends StatefulWidget {
@@ -33,12 +35,18 @@ class _HeroSectionState extends State<HeroSection> {
         _currentIndex = (_currentIndex + 1) % _images.length;
       });
     });
+    LanguageService().addListener(_onLanguageChanged);
   }
 
   @override
   void dispose() {
     _timer.cancel();
+    LanguageService().removeListener(_onLanguageChanged);
     super.dispose();
+  }
+
+  void _onLanguageChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -47,7 +55,7 @@ class _HeroSectionState extends State<HeroSection> {
     final isPhone = screenWidth < 600;
 
     return ListenableBuilder(
-      listenable: ThemeService(),
+      listenable: Listenable.merge([ThemeService(), LanguageService()]),
       builder: (context, _) {
         final isNight = ThemeService().isNight;
 
@@ -107,7 +115,7 @@ class _HeroSectionState extends State<HeroSection> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Good food, beautiful view,\nunforgettable moments.',
+                T.heroTitle,
                 style: GoogleFonts.cinzel(
                   fontSize: 42,
                   fontWeight: FontWeight.w700,
@@ -124,7 +132,7 @@ class _HeroSectionState extends State<HeroSection> {
               ),
               const SizedBox(height: AppSpacing.xl),
               Text(
-                'Premium cafeteria experience with handcrafted dishes\nand breathtaking ambiance.',
+                T.heroSubtitle,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 16,
                   color: primary.withValues(alpha: 0.9),
@@ -145,7 +153,7 @@ class _HeroSectionState extends State<HeroSection> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Good food, beautiful view, unforgettable moments.',
+          T.heroTitlePhone,
           textAlign: TextAlign.center,
           style: GoogleFonts.cinzel(
             fontSize: 24,
@@ -163,7 +171,7 @@ class _HeroSectionState extends State<HeroSection> {
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
-          'Premium cafeteria experience.',
+          T.heroSubtitlePhone,
           textAlign: TextAlign.center,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
