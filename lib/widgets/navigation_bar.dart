@@ -78,22 +78,29 @@ class _AngoraNavBarState extends State<AngoraNavBar> {
                   if (!isPhone) const SizedBox(width: 100),
                   GestureDetector(
                     onTap: _onLogoTap,
-                    child: Text(
-                      'ANGORA',
-                      style: GoogleFonts.cinzel(
-                        fontSize: isPhone ? 20 : 24,
-                        fontWeight: FontWeight.w700,
-                        color: primary,
-                        letterSpacing: 4,
-                        shadows: isNight
-                            ? [
-                                Shadow(
-                                  color: primary.withValues(alpha: 0.6),
-                                  blurRadius: 12,
-                                ),
-                              ]
-                            : null,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'ANGORA',
+                          style: GoogleFonts.cinzel(
+                            fontSize: isPhone ? 20 : 24,
+                            fontWeight: FontWeight.w700,
+                            color: primary,
+                            letterSpacing: 4,
+                            shadows: isNight
+                                ? [
+                                    Shadow(
+                                      color: primary.withValues(alpha: 0.6),
+                                      blurRadius: 12,
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.pets, color: AppColors.secondary, size: 20),
+                      ],
                     ),
                   ),
                   if (!isPhone)
