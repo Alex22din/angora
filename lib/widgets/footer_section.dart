@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../services/theme_service.dart';
 import '../services/language_service.dart';
@@ -7,6 +8,10 @@ import '../l10n/translations.dart';
 
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
+
+  static const _tiktokUrl = 'https://www.tiktok.com/@caftria.angora?_r=1&_t=ZS-98AgeWnVzOr';
+  static const _instagramUrl = 'https://www.instagram.com/angora_coffee?igsh=MXhvYTQxcjVlajMxZA==';
+  static const _phone = '0562080464';
 
   @override
   Widget build(BuildContext context) {
@@ -72,37 +77,40 @@ class FooterSection extends StatelessWidget {
   }
 
   Widget _buildReservation(Color primary, Color textDim) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: primary,
-            shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: () => launchUrl(Uri.parse('tel:$_phone')),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: primary,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.phone, color: Colors.white, size: 18),
           ),
-          child: const Icon(Icons.phone, color: Colors.white, size: 18),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              T.forReservations,
-              style: GoogleFonts.plusJakartaSans(fontSize: 11, color: textDim),
-            ),
-            Text(
-              '+213 555 12 34 56',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: primary,
+          const SizedBox(width: AppSpacing.sm),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                T.forReservations,
+                style: GoogleFonts.plusJakartaSans(fontSize: 11, color: textDim),
               ),
-            ),
-          ],
-        ),
-      ],
+              Text(
+                _phone,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: primary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -134,11 +142,17 @@ class FooterSection extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(fontSize: 11, color: textDim),
         ),
         const SizedBox(width: AppSpacing.sm),
-        _SocialCircle(icon: Icons.facebook, color: primary),
+        _SocialCircle(
+          icon: Icons.tiktok,
+          color: primary,
+          onTap: () => launchUrl(Uri.parse(_tiktokUrl)),
+        ),
         const SizedBox(width: 6),
-        _SocialCircle(icon: Icons.camera_alt_outlined, color: primary),
-        const SizedBox(width: 6),
-        _SocialCircle(icon: Icons.music_note, color: primary),
+        _SocialCircle(
+          icon: Icons.camera_alt_outlined,
+          color: primary,
+          onTap: () => launchUrl(Uri.parse(_instagramUrl)),
+        ),
       ],
     );
   }
@@ -147,19 +161,27 @@ class FooterSection extends StatelessWidget {
 class _SocialCircle extends StatelessWidget {
   final IconData icon;
   final Color color;
+  final VoidCallback onTap;
 
-  const _SocialCircle({required this.icon, required this.color});
+  const _SocialCircle({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white, size: 16),
       ),
-      child: Icon(icon, color: Colors.white, size: 16),
     );
   }
 }
