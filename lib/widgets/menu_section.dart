@@ -51,9 +51,15 @@ class _MenuSectionState extends State<MenuSection> {
         }
       }
       for (final sub in cat.subcategories ?? []) {
-        for (final item in sub.items) {
-          if (_itemMatches(item, q)) {
-            results.add(_SearchResult(category: cat, item: item));
+        if (_subMatches(sub, q)) {
+          for (final item in sub.items) {
+            results.add(_SearchResult(category: cat, subcategory: sub, item: item));
+          }
+        } else {
+          for (final item in sub.items) {
+            if (_itemMatches(item, q)) {
+              results.add(_SearchResult(category: cat, subcategory: sub, item: item));
+            }
           }
         }
       }
@@ -61,11 +67,20 @@ class _MenuSectionState extends State<MenuSection> {
     return results;
   }
 
+  bool _subMatches(MenuSubcategory sub, String query) {
+    if (sub.localizedName.toLowerCase().contains(query)) return true;
+    if (sub.name.toLowerCase().contains(query)) return true;
+    if (sub.nameEn?.toLowerCase().contains(query) == true) return true;
+    if (sub.nameAr?.toLowerCase().contains(query) == true) return true;
+    return false;
+  }
+
   bool _itemMatches(MenuItem item, String query) {
     if (item.localizedName.toLowerCase().contains(query)) return true;
     if (item.name.toLowerCase().contains(query)) return true;
     if (item.nameEn?.toLowerCase().contains(query) == true) return true;
     if (item.nameAr?.toLowerCase().contains(query) == true) return true;
+    if (item.localizedDescription?.toLowerCase().contains(query) == true) return true;
     if (item.description?.toLowerCase().contains(query) == true) return true;
     if (item.descriptionEn?.toLowerCase().contains(query) == true) return true;
     if (item.descriptionAr?.toLowerCase().contains(query) == true) return true;
@@ -301,10 +316,18 @@ class _MenuSectionState extends State<MenuSection> {
       );
     }
 
-    // Group results by category
-    final grouped = <String, List<_SearchResult>>{};
+    // Group results by category, then by subcategory
+    final grouped = <String, _CategoryGroup>{};
     for (final r in results) {
-      grouped.putIfAbsent(r.category.id, () => []).add(r);
+      grouped.putIfAbsent(
+        r.category.id,
+        () => _CategoryGroup(category: r.category),
+      );
+      final subKey = r.subcategory?.id ?? '__direct__';
+      grouped[r.category.id]!.items.putIfAbsent(
+        subKey,
+        () => _SubGroup(subcategory: r.subcategory),
+      ).items.add(r.item);
     }
 
     return Column(
@@ -322,13 +345,14 @@ class _MenuSectionState extends State<MenuSection> {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        ...grouped.entries.map((entry) {
-          final cat = entry.value.first.category;
+        ...grouped.values.map((catGroup) {
+          final cat = catGroup.category;
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.xl),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Category header
                 Row(
                   children: [
                     Text(cat.icon, style: const TextStyle(fontSize: 18)),
@@ -345,10 +369,54 @@ class _MenuSectionState extends State<MenuSection> {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.md),
-                ...entry.value.map((r) => Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: MenuItemCard(item: r.item, categoryIcon: cat.icon),
-                )),
+                // Subcategories + items
+                ...catGroup.items.entries.map((subEntry) {
+                  final subGroup = subEntry.value;
+                  final items = subGroup.items;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (subGroup.subcategory != null) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8, bottom: AppSpacing.sm),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 3,
+                                  height: 14,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.secondary,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.sm),
+                                Text(
+                                  subGroup.subcategory!.localizedName,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ...items.map((item) => Padding(
+                            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                            child: MenuItemCard(item: item, categoryIcon: cat.icon),
+                          )),
+                        ] else ...[
+                          ...items.map((item) => Padding(
+                            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                            child: MenuItemCard(item: item, categoryIcon: cat.icon),
+                          )),
+                        ],
+                      ],
+                    ),
+                  );
+                }),
               ],
             ),
           );
@@ -358,8 +426,21 @@ class _MenuSectionState extends State<MenuSection> {
   }
 }
 
+class _SubGroup {
+  final MenuSubcategory? subcategory;
+  final List<MenuItem> items = [];
+  _SubGroup({required this.subcategory});
+}
+
+class _CategoryGroup {
+  final MenuCategory category;
+  final Map<String, _SubGroup> items = {};
+  _CategoryGroup({required this.category});
+}
+
 class _SearchResult {
   final MenuCategory category;
+  final MenuSubcategory? subcategory;
   final MenuItem item;
-  const _SearchResult({required this.category, required this.item});
+  const _SearchResult({required this.category, this.subcategory, required this.item});
 }
