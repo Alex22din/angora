@@ -1,7 +1,8 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../helpers/io_helper.dart' as io;
 import '../../theme/app_theme.dart';
 import '../../services/theme_service.dart';
 import '../../models/menu_data.dart';
@@ -609,18 +610,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen>
             leading: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: item.imageUrl != null
-                  ? Image.file(
-                      File(item.imageUrl!),
-                      width: 48,
-                      height: 48,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, e, s) => Container(
-                        width: 48,
-                        height: 48,
-                        color: cardBg,
-                        child: Text(cat.icon, style: const TextStyle(fontSize: 24)),
-                      ),
-                    )
+                  ? _buildItemImage(item.imageUrl!, cat.icon, cardBg)
                   : Container(
                       width: 48,
                       height: 48,
@@ -658,6 +648,39 @@ class _AdminPanelScreenState extends State<AdminPanelScreen>
           ),
         );
       },
+    );
+  }
+
+  Widget _buildItemImage(String url, String icon, Color cardBg) {
+    final fallback = Container(
+      width: 48,
+      height: 48,
+      color: cardBg,
+      child: Text(icon, style: const TextStyle(fontSize: 24)),
+    );
+
+    if (url.startsWith('data:')) {
+      try {
+        final bytes = base64Decode(url.split(',').last);
+        return Image.memory(
+          bytes,
+          width: 48,
+          height: 48,
+          fit: BoxFit.cover,
+          errorBuilder: (_, e, s) => fallback,
+        );
+      } catch (_) {
+        return fallback;
+      }
+    }
+
+    return io.buildImageFromFile(
+      url,
+      width: 48,
+      height: 48,
+      fit: BoxFit.cover,
+      errorBuilder: (_, e, s) => fallback,
+      fallback: fallback,
     );
   }
 }

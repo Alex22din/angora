@@ -1,8 +1,10 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../helpers/io_helper.dart' as io;
 import '../../theme/app_theme.dart';
 import '../../services/theme_service.dart';
 import '../../models/menu_data.dart';
@@ -35,7 +37,8 @@ class _AdminItemFormState extends State<AdminItemForm> {
   bool _isMultiPriced = false;
   Map<String, int> _prices = {};
   List<String> _ingredients = [];
-  File? _pickedImage;
+  Uint8List? _pickedImageBytes;
+  String? _pickedImageExt;
   String? _existingImageUrl;
 
   @override
@@ -70,10 +73,14 @@ class _AdminItemFormState extends State<AdminItemForm> {
       allowMultiple: false,
     );
     if (result != null && result.files.isNotEmpty) {
-      final file = File(result.files.first.path!);
-      setState(() {
-        _pickedImage = file;
-      });
+      final file = result.files.first;
+      _pickedImageExt = file.extension ?? 'png';
+      if (kIsWeb) {
+        _pickedImageBytes = file.bytes;
+      } else {
+        _pickedImageBytes = await io.readFileBytes(file.path!);
+      }
+      setState(() {});
     }
   }
 
@@ -121,11 +128,12 @@ class _AdminItemFormState extends State<AdminItemForm> {
       price = int.tryParse(_priceController.text.trim());
     }
 
-    String? savedImagePath = _existingImageUrl;
-    if (_pickedImage != null) {
-      savedImagePath = await MenuDataManager().saveImage(
-        _pickedImage!,
+    String? savedImageUrl = _existingImageUrl;
+    if (_pickedImageBytes != null) {
+      savedImageUrl = await MenuDataManager().saveImageBytes(
+        _pickedImageBytes!,
         widget.item?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        _pickedImageExt ?? 'png',
       );
     }
 
@@ -139,7 +147,7 @@ class _AdminItemFormState extends State<AdminItemForm> {
       isMultiPriced: _isMultiPriced,
       prices: _isMultiPriced && _prices.isNotEmpty ? _prices : null,
       ingredients: _ingredients.isNotEmpty ? _ingredients : null,
-      imageUrl: savedImagePath,
+      imageUrl: savedImageUrl,
     );
 
     if (mounted) {
@@ -200,13 +208,13 @@ class _AdminItemFormState extends State<AdminItemForm> {
                       borderRadius: BorderRadius.circular(AppRadius.card),
                       border: Border.all(color: border, style: BorderStyle.solid),
                     ),
-                    child: _pickedImage != null
+                    child: _pickedImageBytes != null
                         ? Stack(
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(AppRadius.card),
-                                child: Image.file(
-                                  _pickedImage!,
+                                child: Image.memory(
+                                  _pickedImageBytes!,
                                   width: double.infinity,
                                   height: 160,
                                   fit: BoxFit.cover,
@@ -216,7 +224,10 @@ class _AdminItemFormState extends State<AdminItemForm> {
                                 top: 8,
                                 right: 8,
                                 child: GestureDetector(
-                                  onTap: () => setState(() => _pickedImage = null),
+                                  onTap: () => setState(() {
+                                    _pickedImageBytes = null;
+                                    _pickedImageExt = null;
+                                  }),
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
@@ -234,13 +245,16 @@ class _AdminItemFormState extends State<AdminItemForm> {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(AppRadius.card),
-                                    child: Image.file(
-                                      File(_existingImageUrl!),
-                                      width: double.infinity,
-                                      height: 160,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, e, s) => _buildImagePlaceholder(textMuted),
-                                    ),
+                                    child: _existingImageUrl!.startsWith('data:')
+                                        ? _buildDataUrlImage(_existingImageUrl!, textMuted)
+                                        : io.buildImageFromFile(
+                                            _existingImageUrl!,
+                                            width: double.infinity,
+                                            height: 160,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, e, s) => _buildImagePlaceholder(textMuted),
+                                            fallback: _buildImagePlaceholder(textMuted),
+                                          ),
                                   ),
                                   Positioned(
                                     top: 8,
@@ -479,6 +493,21 @@ class _AdminItemFormState extends State<AdminItemForm> {
         ),
       ],
     );
+  }
+
+  Widget _buildDataUrlImage(String dataUrl, Color textMuted) {
+    try {
+      final bytes = base64Decode(dataUrl.split(',').last);
+      return Image.memory(
+        bytes,
+        width: double.infinity,
+        height: 160,
+        fit: BoxFit.cover,
+        errorBuilder: (_, e, s) => _buildImagePlaceholder(textMuted),
+      );
+    } catch (_) {
+      return _buildImagePlaceholder(textMuted);
+    }
   }
 
   String _formatKey(String key) {

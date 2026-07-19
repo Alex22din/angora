@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/io_helper.dart' as io;
 import 'menu_data.dart';
 
 class MenuDataManager extends ChangeNotifier {
@@ -139,30 +138,18 @@ class MenuDataManager extends ChangeNotifier {
 
   // ── Image Storage ──
 
-  Future<String?> saveImage(File sourceFile, String itemId) async {
-    try {
-      final appDir = await getApplicationDocumentsDirectory();
-      final imagesDir = Directory('${appDir.path}/menu_images');
-      if (!await imagesDir.exists()) {
-        await imagesDir.create(recursive: true);
-      }
-      final ext = sourceFile.path.split('.').last;
-      final destFile = File('${imagesDir.path}/$itemId.$ext');
-      await sourceFile.copy(destFile.path);
-      return destFile.path;
-    } catch (_) {
-      return null;
+  Future<String?> saveImageBytes(Uint8List bytes, String itemId, String ext) async {
+    if (kIsWeb) {
+      final base64Str = base64Encode(bytes);
+      return 'data:image/$ext;base64,$base64Str';
     }
+    return io.saveImageBytes(bytes, itemId, ext);
   }
 
   Future<void> deleteImage(String? imagePath) async {
     if (imagePath == null) return;
-    try {
-      final file = File(imagePath);
-      if (await file.exists()) {
-        await file.delete();
-      }
-    } catch (_) {}
+    if (kIsWeb) return;
+    await io.deleteImageFile(imagePath);
   }
 
   // ── Helpers ──

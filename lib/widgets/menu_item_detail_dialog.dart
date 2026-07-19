@@ -1,7 +1,8 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../helpers/io_helper.dart' as io;
 import '../theme/app_theme.dart';
 import '../services/theme_service.dart';
 import '../models/menu_data.dart';
@@ -74,15 +75,7 @@ class MenuItemDetailDialog extends StatelessWidget {
                         topRight: Radius.circular(AppRadius.lg),
                       ),
                       child: item.imageUrl != null
-                          ? Image.file(
-                              File(item.imageUrl!),
-                              width: double.infinity,
-                              height: 200,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, e, s) => Center(
-                                child: Text(categoryIcon, style: const TextStyle(fontSize: 72)),
-                              ),
-                            )
+                          ? _buildItemImage(item.imageUrl!, categoryIcon)
                           : Center(
                               child: Text(categoryIcon, style: const TextStyle(fontSize: 72)),
                             ),
@@ -251,5 +244,35 @@ class MenuItemDetailDialog extends StatelessWidget {
 
   String _formatKey(String key) {
     return key.split('_').map((w) => w[0].toUpperCase() + w.substring(1)).join(' ');
+  }
+
+  Widget _buildItemImage(String url, String categoryIcon) {
+    final fallback = Center(
+      child: Text(categoryIcon, style: const TextStyle(fontSize: 72)),
+    );
+
+    if (url.startsWith('data:')) {
+      try {
+        final bytes = base64Decode(url.split(',').last);
+        return Image.memory(
+          bytes,
+          width: double.infinity,
+          height: 200,
+          fit: BoxFit.cover,
+          errorBuilder: (_, e, s) => fallback,
+        );
+      } catch (_) {
+        return fallback;
+      }
+    }
+
+    return io.buildImageFromFile(
+      url,
+      width: double.infinity,
+      height: 200,
+      fit: BoxFit.cover,
+      errorBuilder: (_, e, s) => fallback,
+      fallback: fallback,
+    );
   }
 }
