@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "angoracaferes"
+  },
+  "targets": {
+    "angoracaferes": {
+      "hosting": {
+        "anguracafeteriaandrestaurant": [
+          "anguracafeteriaandrestaurant"
+        ]
+      }
+    }
+  }
+}

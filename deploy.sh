@@ -1,24 +1,13 @@
 #!/bin/bash
 set -e
 
-echo "Building Flutter Web app with base-href /angora/..."
-flutter build web --base-href "/angora/"
+echo "Building Flutter Web app..."
+flutter build web --base-href "/"
 
-echo "Deploying build/web to gh-pages branch..."
-cd build/web
+SHORT_SHA="$(git rev-parse --short HEAD)"
+sed -i "s/__APP_VERSION__/${SHORT_SHA}/g" build/web/index.html
 
-# Check if git is already initialized in build/web
-if [ ! -d ".git" ]; then
-    git init
-    git checkout -b gh-pages
-    git remote add origin git@github.com:Alex22din/angora.git
-else
-    # Make sure we are on gh-pages branch
-    git checkout -B gh-pages
-fi
-
-git add .
-git commit -m "Deploy to GitHub Pages"
-git push -f origin gh-pages
+echo "Deploying to Firebase Hosting..."
+firebase deploy --only hosting:anguracafeteriaandrestaurant
 
 echo "Successfully deployed!"
