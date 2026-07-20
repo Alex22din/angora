@@ -304,16 +304,24 @@ class _AdminItemFormState extends State<AdminItemForm> {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(AppRadius.card),
-                                    child: _existingImageUrl!.startsWith('data:')
-                                        ? _buildDataUrlImage(_existingImageUrl!, textMuted)
-                                        : io.buildImageFromFile(
+                                    child: _existingImageUrl!.startsWith('http')
+                                        ? Image.network(
                                             _existingImageUrl!,
                                             width: double.infinity,
                                             height: 160,
                                             fit: BoxFit.cover,
                                             errorBuilder: (_, e, s) => _buildImagePlaceholder(textMuted),
-                                            fallback: _buildImagePlaceholder(textMuted),
-                                          ),
+                                          )
+                                        : _existingImageUrl!.startsWith('data:')
+                                            ? _buildDataUrlImage(_existingImageUrl!, textMuted)
+                                            : io.buildImageFromFile(
+                                                _existingImageUrl!,
+                                                width: double.infinity,
+                                                height: 160,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (_, e, s) => _buildImagePlaceholder(textMuted),
+                                                fallback: _buildImagePlaceholder(textMuted),
+                                              ),
                                   ),
                                   Positioned(
                                     top: 8,

@@ -1,37 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
+import '../../services/auth_service.dart';
 import '../../services/theme_service.dart';
 import 'admin_panel_screen.dart';
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
 
-  static const String password = 'Alaa2231@@##';
-
   @override
   State<AdminLoginScreen> createState() => _AdminLoginScreenState();
 }
 
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
-  final _controller = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscure = true;
   String? _error;
+  bool _loading = false;
 
-  void _login() {
-    if (_controller.text == AdminLoginScreen.password) {
+  @override
+  void initState() {
+    super.initState();
+    _emailController.text = 'angora@gmail.com';
+  }
+
+  void _login() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _error = 'Email and password are required';
+        _loading = false;
+      });
+      return;
+    }
+
+    final error = await AuthService().login(email, password);
+
+    if (error != null) {
+      setState(() {
+        _error = error;
+        _loading = false;
+      });
+      return;
+    }
+
+    if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const AdminPanelScreen()),
       );
-    } else {
-      setState(() => _error = 'Wrong password');
-      _controller.clear();
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -83,7 +114,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      'Enter password to continue',
+                      'Sign in to continue',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         color: textMuted,
@@ -91,7 +122,35 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     TextField(
-                      controller: _controller,
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 15,
+                        color: textPrimary,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Email',
+                        hintStyle: GoogleFonts.plusJakartaSans(color: textMuted),
+                        prefixIcon: Icon(Icons.email_outlined, color: textMuted, size: 20),
+                        filled: true,
+                        fillColor: AppColorsHelper.cardBg(isNight),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                          borderSide: BorderSide(color: border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                          borderSide: BorderSide(color: border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                          borderSide: BorderSide(color: primary, width: 2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    TextField(
+                      controller: _passwordController,
                       obscureText: _obscure,
                       onSubmitted: (_) => _login(),
                       style: GoogleFonts.plusJakartaSans(
@@ -137,7 +196,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: _login,
+                        onPressed: _loading ? null : _login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primary,
                           foregroundColor: isNight ? AppColors.nightScaffold : Colors.white,
@@ -146,13 +205,22 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           ),
                           elevation: 0,
                         ),
-                        child: Text(
-                          'Login',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: _loading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                'Login',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.md),

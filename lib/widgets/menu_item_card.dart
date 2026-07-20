@@ -146,6 +146,16 @@ class MenuItemCard extends StatelessWidget {
       child: Text(categoryIcon, style: TextStyle(fontSize: isPhone ? 32 : 44)),
     );
 
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return Image.network(
+        url,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (_, e, s) => fallback,
+      );
+    }
+
     if (url.startsWith('data:')) {
       try {
         final bytes = base64Decode(url.split(',').last);

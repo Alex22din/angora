@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/io_helper.dart' as io;
+import '../services/firestore_menu_service.dart';
+import '../services/storage_service.dart';
 import 'menu_data.dart';
 
 class MenuDataManager extends ChangeNotifier {
@@ -20,20 +22,31 @@ class MenuDataManager extends ChangeNotifier {
   bool get isLoaded => _loaded;
 
   Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonStr = prefs.getString(_storageKey);
+    final firestoreService = FirestoreMenuService();
 
-    if (jsonStr != null) {
-      try {
-        final List<dynamic> jsonList = jsonDecode(jsonStr);
-        _categories = jsonList
-            .map((c) => MenuCategory.fromJson(c as Map<String, dynamic>))
-            .toList();
-      } catch (_) {
+    try {
+      final hasFirestoreData = await firestoreService.hasData();
+      if (hasFirestoreData) {
+        _categories = await firestoreService.loadCategories();
+      } else {
+        _categories = defaultMenuCategories();
+        await firestoreService.seedCategories(_categories);
+      }
+    } catch (_) {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(_storageKey);
+      if (jsonStr != null) {
+        try {
+          final List<dynamic> jsonList = jsonDecode(jsonStr);
+          _categories = jsonList
+              .map((c) => MenuCategory.fromJson(c as Map<String, dynamic>))
+              .toList();
+        } catch (_) {
+          _categories = defaultMenuCategories();
+        }
+      } else {
         _categories = defaultMenuCategories();
       }
-    } else {
-      _categories = defaultMenuCategories();
     }
 
     _loaded = true;
@@ -44,6 +57,11 @@ class MenuDataManager extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final jsonList = _categories.map((c) => c.toJson()).toList();
     await prefs.setString(_storageKey, jsonEncode(jsonList));
+
+    try {
+      await FirestoreMenuService().saveAll(_categories);
+    } catch (_) {}
+
     notifyListeners();
   }
 
@@ -139,6 +157,11 @@ class MenuDataManager extends ChangeNotifier {
   // ── Image Storage ──
 
   Future<String?> saveImageBytes(Uint8List bytes, String itemId, String ext) async {
+    try {
+      final url = await StorageService().uploadImage(bytes, itemId, ext);
+      if (url != null) return url;
+    } catch (_) {}
+
     if (kIsWeb) {
       final base64Str = base64Encode(bytes);
       return 'data:image/$ext;base64,$base64Str';
@@ -148,6 +171,12 @@ class MenuDataManager extends ChangeNotifier {
 
   Future<void> deleteImage(String? imagePath) async {
     if (imagePath == null) return;
+    if (imagePath.startsWith('http')) {
+      try {
+        await StorageService().deleteImage(imagePath);
+      } catch (_) {}
+      return;
+    }
     if (kIsWeb) return;
     await io.deleteImageFile(imagePath);
   }

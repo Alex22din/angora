@@ -252,6 +252,16 @@ class MenuItemDetailDialog extends StatelessWidget {
       child: Text(categoryIcon, style: const TextStyle(fontSize: 72)),
     );
 
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return Image.network(
+        url,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+        errorBuilder: (_, e, s) => fallback,
+      );
+    }
+
     if (url.startsWith('data:')) {
       try {
         final bytes = base64Decode(url.split(',').last);
