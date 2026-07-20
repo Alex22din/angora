@@ -659,6 +659,16 @@ class _AdminPanelScreenState extends State<AdminPanelScreen>
       child: Text(icon, style: const TextStyle(fontSize: 24)),
     );
 
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return Image.network(
+        url,
+        width: 48,
+        height: 48,
+        fit: BoxFit.cover,
+        errorBuilder: (_, e, s) => fallback,
+      );
+    }
+
     if (url.startsWith('data:')) {
       try {
         final bytes = base64Decode(url.split(',').last);

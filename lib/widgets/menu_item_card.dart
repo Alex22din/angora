@@ -114,7 +114,7 @@ class MenuItemCard extends StatelessWidget {
                   children: [
                     Text(
                       item.isMultiPriced
-                          ? '${T.from} ${item.prices?.values.first ?? 0} DA'
+                          ? '${T.from} ${(item.prices != null && item.prices!.isNotEmpty) ? item.prices!.values.first : 0} DA'
                           : '${item.price ?? 0} DA',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: isPhone ? 14 : 18,

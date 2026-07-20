@@ -22,18 +22,24 @@ class MenuDataManager extends ChangeNotifier {
   bool get isLoaded => _loaded;
 
   Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
     final firestoreService = FirestoreMenuService();
 
     try {
       final hasFirestoreData = await firestoreService.hasData();
       if (hasFirestoreData) {
-        _categories = await firestoreService.loadCategories();
+        final loaded = await firestoreService.loadCategories();
+        if (loaded.isNotEmpty) {
+          _categories = loaded;
+        } else {
+          _categories = defaultMenuCategories();
+          await firestoreService.seedCategories(_categories);
+        }
       } else {
         _categories = defaultMenuCategories();
         await firestoreService.seedCategories(_categories);
       }
     } catch (_) {
-      final prefs = await SharedPreferences.getInstance();
       final jsonStr = prefs.getString(_storageKey);
       if (jsonStr != null) {
         try {
@@ -60,7 +66,10 @@ class MenuDataManager extends ChangeNotifier {
 
     try {
       await FirestoreMenuService().saveAll(_categories);
-    } catch (_) {}
+    } catch (e) {
+      // Firestore sync failed — data is saved locally but not in cloud.
+      // The admin will see stale data on other devices until sync succeeds.
+    }
 
     notifyListeners();
   }

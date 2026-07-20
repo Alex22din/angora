@@ -99,10 +99,10 @@ class MenuItem {
         description: json['description'] as String?,
         descriptionEn: json['descriptionEn'] as String?,
         descriptionAr: json['descriptionAr'] as String?,
-        price: json['price'] as int?,
+        price: (json['price'] as num?)?.toInt(),
         isMultiPriced: json['isMultiPriced'] as bool? ?? false,
         prices: (json['prices'] as Map<String, dynamic>?)?.map(
-          (k, v) => MapEntry(k, v as int),
+          (k, v) => MapEntry(k, (v as num).toInt()),
         ),
         ingredients: (json['ingredients'] as List<dynamic>?)?.cast<String>(),
         ingredientsEn: (json['ingredientsEn'] as List<dynamic>?)?.cast<String>(),

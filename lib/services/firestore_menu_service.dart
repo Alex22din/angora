@@ -11,14 +11,10 @@ class FirestoreMenuService {
   final String _collection = 'categories';
 
   Future<List<MenuCategory>> loadCategories() async {
-    try {
-      final snapshot = await _db.collection(_collection).orderBy('name').get();
-      return snapshot.docs
-          .map((doc) => MenuCategory.fromJson(doc.data()))
-          .toList();
-    } catch (e) {
-      return [];
-    }
+    final snapshot = await _db.collection(_collection).orderBy('name').get();
+    return snapshot.docs
+        .map((doc) => MenuCategory.fromJson(doc.data()))
+        .toList();
   }
 
   Future<bool> hasData() async {
