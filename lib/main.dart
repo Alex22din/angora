@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'models/menu_data_manager.dart';
 import 'screens/home_screen.dart';
-import 'services/auth_service.dart';
 import 'services/firebase_service.dart';
 import 'services/theme_service.dart';
 import 'theme/app_theme.dart';
@@ -10,8 +9,7 @@ import 'theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FirebaseService().init();
-  await AuthService().ensureAdminAccount();
-  await MenuDataManager().init();
+  MenuDataManager().init();
   runApp(const CafeteriaAngoraApp());
 }
 
