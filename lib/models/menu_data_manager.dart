@@ -160,7 +160,9 @@ class MenuDataManager extends ChangeNotifier {
     try {
       final url = await StorageService().uploadImage(bytes, itemId, ext);
       if (url != null) return url;
-    } catch (_) {}
+    } catch (e) {
+      rethrow;
+    }
 
     if (kIsWeb) {
       final base64Str = base64Encode(bytes);

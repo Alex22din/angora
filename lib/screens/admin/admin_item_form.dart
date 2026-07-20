@@ -190,11 +190,23 @@ class _AdminItemFormState extends State<AdminItemForm> {
 
     String? savedImageUrl = _existingImageUrl;
     if (_pickedImageBytes != null) {
-      savedImageUrl = await MenuDataManager().saveImageBytes(
-        _pickedImageBytes!,
-        widget.item?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        _pickedImageExt ?? 'png',
-      );
+      try {
+        savedImageUrl = await MenuDataManager().saveImageBytes(
+          _pickedImageBytes!,
+          widget.item?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+          _pickedImageExt ?? 'png',
+        );
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Image upload failed: ${e.toString()}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
     }
 
     final result = MenuItem(
