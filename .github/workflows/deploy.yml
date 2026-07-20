@@ -29,6 +29,11 @@ jobs:
       - name: Build web
         run: flutter build web --base-href "/angora/"
 
+      - name: Add cache-busting version to index.html
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          sed -i "s/__APP_VERSION__/${SHORT_SHA}/g" build/web/index.html
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
