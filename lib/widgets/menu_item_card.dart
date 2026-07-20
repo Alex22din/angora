@@ -152,7 +152,14 @@ class MenuItemCard extends StatelessWidget {
         width: double.infinity,
         height: double.infinity,
         fit: BoxFit.cover,
-        errorBuilder: (_, e, s) => fallback,
+        gaplessPlayback: true,
+        errorBuilder: (context, error, stack) => fallback,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: Text(categoryIcon, style: TextStyle(fontSize: isPhone ? 32 : 44)),
+          );
+        },
       );
     }
 

@@ -322,7 +322,12 @@ class _AdminItemFormState extends State<AdminItemForm> {
                                             width: double.infinity,
                                             height: 160,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (_, e, s) => _buildImagePlaceholder(textMuted),
+                                            gaplessPlayback: true,
+                                            errorBuilder: (context, error, stack) => _buildImagePlaceholder(textMuted),
+                                            loadingBuilder: (context, child, loadingProgress) {
+                                              if (loadingProgress == null) return child;
+                                              return _buildImagePlaceholder(textMuted);
+                                            },
                                           )
                                         : _existingImageUrl!.startsWith('data:')
                                             ? _buildDataUrlImage(_existingImageUrl!, textMuted)

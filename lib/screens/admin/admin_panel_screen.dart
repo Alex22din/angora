@@ -665,7 +665,12 @@ class _AdminPanelScreenState extends State<AdminPanelScreen>
         width: 48,
         height: 48,
         fit: BoxFit.cover,
-        errorBuilder: (_, e, s) => fallback,
+        gaplessPlayback: true,
+        errorBuilder: (context, error, stack) => fallback,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return fallback;
+        },
       );
     }
 
